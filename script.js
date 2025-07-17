@@ -1,10 +1,22 @@
-const helloWorldText = document.getElementById('hello-world');
-const colorButton = document.getElementById('color-button');
+const quoteText = document.getElementById('quote-text');
+const quoteAuthor = document.getElementById('quote-author');
+const newQuoteButton = document.getElementById('new-quote-button');
 
-const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33A1'];
-let currentColorIndex = 0;
+async function getNewQuote() {
+    quoteText.textContent = 'Loading...';
+    quoteAuthor.textContent = '';
+    try {
+        const response = await fetch('https://api.quotable.io/random');
+        const data = await response.json();
+        quoteText.textContent = data.content;
+        quoteAuthor.textContent = `- ${data.author}`;
+    } catch (error) {
+        quoteText.textContent = 'Could not fetch a quote. Please try again.';
+        console.error('Error fetching quote:', error);
+    }
+}
 
-colorButton.addEventListener('click', () => {
-    currentColorIndex = (currentColorIndex + 1) % colors.length;
-    helloWorldText.style.color = colors[currentColorIndex];
-});
+newQuoteButton.addEventListener('click', getNewQuote);
+
+// Load a quote when the page first loads
+getNewQuote();
