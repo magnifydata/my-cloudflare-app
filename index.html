@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub User Finder</title>
+    <title>Cloudflare AI Notebook</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="main-container">
-        <h1>GitHub User Finder</h1>
-        <form id="user-form">
-            <input type="text" id="username-input" placeholder="Enter a GitHub username..." required>
-            <button type="submit">Search</button>
-        </form>
-        <div id="profile-display"></div>
+    <div class="notebook-container">
+        <h1>My AI Notebook</h1>
+        <p>Ask a question and get a response from a Llama-2 model running on Cloudflare.</p>
+        
+        <div class="cell">
+            <div class="prompt-area">
+                <label for="prompt-input">PROMPT:</label>
+                <textarea id="prompt-input" rows="4" placeholder="e.g., Explain the concept of serverless functions in 3 sentences."></textarea>
+                <button id="submit-button">Run Cell</button>
+            </div>
+            <div class="response-area">
+                <label>RESPONSE:</label>
+                <div id="response-output"></div>
+            </div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
