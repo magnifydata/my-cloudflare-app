@@ -1,29 +1,49 @@
-const quoteText = document.getElementById('quote-text');
-const quoteAuthor = document.getElementById('quote-author');
-const newQuoteButton = document.getElementById('new-quote-button');
+const userForm = document.getElementById('user-form');
+const usernameInput = document.getElementById('username-input');
+const profileDisplay = document.getElementById('profile-display');
 
-async function getRandomTodo() {
-    quoteText.textContent = 'Loading...';
-    quoteAuthor.textContent = '';
+async function findUser(event) {
+    // Prevent the form from actually submitting and reloading the page
+    event.preventDefault();
+
+    const username = usernameInput.value;
+    profileDisplay.innerHTML = `<p>Searching for ${username}...</p>`;
+    profileDisplay.classList.add('visible');
+
     try {
-        // Generate a random number between 1 and 200
-        const randomId = Math.floor(Math.random() * 200) + 1;
+        const response = await fetch(`https://api.github.com/users/${username}`);
 
-        // Use the random number in the API URL
-        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${randomId}`);
+        // The GitHub API returns a 404 error if the user isn't found
+        if (!response.ok) {
+            throw new Error(`User not found. (Status: ${response.status})`);
+        }
+
         const data = await response.json();
-
-        // Display the new, random data
-        quoteText.textContent = `Title: "${data.title}"`;
-        quoteAuthor.textContent = `User ID: ${data.userId} (Todo ID: ${data.id})`;
+        displayUserProfile(data);
 
     } catch (error) {
-        quoteText.textContent = 'Could not fetch data. Please try again.';
-        console.error('Error fetching data:', error);
+        profileDisplay.innerHTML = `<p style="color: red;">${error.message}</p>`;
+        console.error('Error fetching GitHub user:', error);
     }
 }
 
-newQuoteButton.addEventListener('click', getRandomTodo);
+function displayUserProfile(user) {
+    const profileHTML = `
+        <div class="profile-header">
+            <img src="${user.avatar_url}" alt="Avatar for ${user.login}" class="profile-avatar">
+            <div>
+                <p class="profile-name">${user.name || 'No name provided'}</p>
+                <p class="profile-login">@${user.login}</p>
+            </div>
+        </div>
+        <p class="profile-bio">${user.bio || 'No bio provided.'}</p>
+        <div class="profile-stats">
+            <span><strong>${user.followers}</strong> Followers</span>
+            <span><strong>${user.following}</strong> Following</span>
+            <span><strong>${user.public_repos}</strong> Repos</span>
+        </div>
+    `;
+    profileDisplay.innerHTML = profileHTML;
+}
 
-// Load a random item when the page first loads
-getRandomTodo();
+userForm.addEventListener('submit', findUser);
