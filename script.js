@@ -26,3 +26,4 @@ newQuoteButton.addEventListener('click', getNewData);
 
 // Load data when the page first loads
 getNewData();
+ 
