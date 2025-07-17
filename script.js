@@ -1,44 +1,28 @@
 const submitButton = document.getElementById('submit-button');
-const promptInput = document.getElementById('prompt-input');
 const responseOutput = document.getElementById('response-output');
+const promptInput = document.getElementById('prompt-input');
 
 submitButton.addEventListener('click', async () => {
-    const prompt = promptInput.value;
-    if (!prompt) {
-        alert('Please enter a prompt.');
-        return;
+  responseOutput.innerText = 'Sending test request to backend...';
+  submitButton.disabled = true;
+
+  try {
+    // We are now fetching our simple test endpoint with a GET request.
+    const response = await fetch('/api/hello');
+
+    // If the response is not ok (e.g., 404, 405, 500), throw an error.
+    if (!response.ok) {
+      throw new Error(`The server responded with status: ${response.status}`);
     }
 
-    // Disable button and clear previous output
-    submitButton.disabled = true;
-    responseOutput.innerText = 'Generating response...';
+    // Get the text from the successful response.
+    const message = await response.text();
+    responseOutput.innerText = message; // Should display "Success! The backend is running."
 
-    try {
-        const response = await fetch('/api/prompt', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prompt }),
-        });
-
-        // The response from a streaming API is a ReadableStream
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        responseOutput.innerText = ''; // Clear "Generating..." message
-
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            responseOutput.innerText += chunk; // Append new text chunk
-        }
-
-    } catch (error) {
-        responseOutput.innerText = 'Error: Could not get a response.';
-        console.error('Error fetching AI response:', error);
-    } finally {
-        // Re-enable the button once done
-        submitButton.disabled = false;
-    }
+  } catch (error) {
+    responseOutput.innerText = `Error: ${error.message}`;
+    console.error('Diagnostic test failed:', error);
+  } finally {
+    submitButton.disabled = false;
+  }
 });
