@@ -2,28 +2,28 @@ const quoteText = document.getElementById('quote-text');
 const quoteAuthor = document.getElementById('quote-author');
 const newQuoteButton = document.getElementById('new-quote-button');
 
-// We are now using a different, very reliable test API
-async function getNewData() {
-    quoteText.textContent = 'Loading test data...';
+async function getRandomTodo() {
+    quoteText.textContent = 'Loading...';
     quoteAuthor.textContent = '';
     try {
-        // Fetch a "todo" item from the JSONPlaceholder test API
-        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+        // Generate a random number between 1 and 200
+        const randomId = Math.floor(Math.random() * 200) + 1;
+
+        // Use the random number in the API URL
+        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${randomId}`);
         const data = await response.json();
 
-        // Display the data in our existing HTML elements
-        quoteText.textContent = `Title: "${data.title}"`; // Display the 'title'
-        quoteAuthor.textContent = `User ID: ${data.userId}`;     // Display the 'userId'
+        // Display the new, random data
+        quoteText.textContent = `Title: "${data.title}"`;
+        quoteAuthor.textContent = `User ID: ${data.userId} (Todo ID: ${data.id})`;
 
     } catch (error) {
-        // This is the error message you were seeing
         quoteText.textContent = 'Could not fetch data. Please try again.';
         console.error('Error fetching data:', error);
     }
 }
 
-newQuoteButton.addEventListener('click', getNewData);
+newQuoteButton.addEventListener('click', getRandomTodo);
 
-// Load data when the page first loads
-getNewData();
- 
+// Load a random item when the page first loads
+getRandomTodo();
