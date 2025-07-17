@@ -1,0 +1,7 @@
+# This file configures your Cloudflare Pages project
+
+name = "my-cloudflare-app-70s"
+compatibility_date = "2024-03-18"
+
+[ai]
+binding = "AI"
