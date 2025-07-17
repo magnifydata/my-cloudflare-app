@@ -1,6 +1,6 @@
 import { Ai } from '@cloudflare/ai';
 
-export async function onRequest(context) {
+export async function onRequestPost(context) {
     // Get the prompt from the POST request body
     const { prompt } = await context.request.json();
     
