@@ -1,49 +1,44 @@
-const userForm = document.getElementById('user-form');
-const usernameInput = document.getElementById('username-input');
-const profileDisplay = document.getElementById('profile-display');
+const submitButton = document.getElementById('submit-button');
+const promptInput = document.getElementById('prompt-input');
+const responseOutput = document.getElementById('response-output');
 
-async function findUser(event) {
-    // Prevent the form from actually submitting and reloading the page
-    event.preventDefault();
+submitButton.addEventListener('click', async () => {
+    const prompt = promptInput.value;
+    if (!prompt) {
+        alert('Please enter a prompt.');
+        return;
+    }
 
-    const username = usernameInput.value;
-    profileDisplay.innerHTML = `<p>Searching for ${username}...</p>`;
-    profileDisplay.classList.add('visible');
+    // Disable button and clear previous output
+    submitButton.disabled = true;
+    responseOutput.innerText = 'Generating response...';
 
     try {
-        const response = await fetch(`https://api.github.com/users/${username}`);
+        const response = await fetch('/api/prompt', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt }),
+        });
 
-        // The GitHub API returns a 404 error if the user isn't found
-        if (!response.ok) {
-            throw new Error(`User not found. (Status: ${response.status})`);
+        // The response from a streaming API is a ReadableStream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        responseOutput.innerText = ''; // Clear "Generating..." message
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            responseOutput.innerText += chunk; // Append new text chunk
         }
 
-        const data = await response.json();
-        displayUserProfile(data);
-
     } catch (error) {
-        profileDisplay.innerHTML = `<p style="color: red;">${error.message}</p>`;
-        console.error('Error fetching GitHub user:', error);
+        responseOutput.innerText = 'Error: Could not get a response.';
+        console.error('Error fetching AI response:', error);
+    } finally {
+        // Re-enable the button once done
+        submitButton.disabled = false;
     }
-}
-
-function displayUserProfile(user) {
-    const profileHTML = `
-        <div class="profile-header">
-            <img src="${user.avatar_url}" alt="Avatar for ${user.login}" class="profile-avatar">
-            <div>
-                <p class="profile-name">${user.name || 'No name provided'}</p>
-                <p class="profile-login">@${user.login}</p>
-            </div>
-        </div>
-        <p class="profile-bio">${user.bio || 'No bio provided.'}</p>
-        <div class="profile-stats">
-            <span><strong>${user.followers}</strong> Followers</span>
-            <span><strong>${user.following}</strong> Following</span>
-            <span><strong>${user.public_repos}</strong> Repos</span>
-        </div>
-    `;
-    profileDisplay.innerHTML = profileHTML;
-}
-
-userForm.addEventListener('submit', findUser);
+});
